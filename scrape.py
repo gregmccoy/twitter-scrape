@@ -19,6 +19,7 @@ class TwitterSearch():
         twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
         twitter = Twython(APP_KEY, APP_SECRET)
         self.twitter = twitter
+        self.tweet_mode = "extended"
         if args.output:
             self.filename = args.output
 
@@ -30,7 +31,7 @@ class TwitterSearch():
         if args.popular:
             self.result_type = 'popular'
         else:
-            self.result_type = ''
+            self.result_type = 'mixed'
 
         if args.search:
             self.search = args.search
@@ -47,9 +48,9 @@ class TwitterSearch():
 
             if self.geo:
                 print("Using GEO {}".format(self.geo))
-                search_results = self.twitter.search(q=query, count=50, lang="en", is_quote_status=False, geocode=self.geo, result_type=self.result_type)
+                search_results = self.twitter.search(q=query, count=50, lang="en", is_quote_status=False, geocode=self.geo, result_type=self.result_type, tweet_mode=self.tweet_mode)
             else:
-                search_results = self.twitter.search(q=query, count=50, lang="en", is_quote_status=False)
+                search_results = self.twitter.search(q=query, count=50, lang="en", is_quote_status=False, tweet_mode=self.tweet_mode)
 
             with open(self.filename, 'w') as f:
                 json_data = "["
@@ -57,8 +58,8 @@ class TwitterSearch():
                     #for i in personal:
                     #    if i in tweet["text"]:
                     #print(i)
-                    print("User: {}".format(tweet["user"]["name"]))
-                    print("Tweet: {}".format(tweet["text"]))
+                    print("User: {}".format(tweet["user"]["name"].encode("utf-8")))
+                    print("Tweet: {}".format(tweet["full_text"].encode("utf-8")))
                     print("Location: {}".format(tweet["user"]["location"]))
                     print("Date: {}".format(tweet["created_at"]))
                     print("Retweets: {}".format(tweet["retweet_count"]))
@@ -67,7 +68,7 @@ class TwitterSearch():
                             #continue
                     data = {
                         "name": tweet["user"]["screen_name"],
-                        "text": tweet["text"],
+                        "text": tweet["full_text"],
                         "created_at": tweet["created_at"],
                         "favorite_count": tweet["favorite_count"],
                         "retweet_count": tweet["retweet_count"],
